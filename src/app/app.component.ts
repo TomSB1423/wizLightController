@@ -80,6 +80,26 @@ export class AppComponent implements OnInit {
     });
   }
 
+  onRandomize(lightId: string): void {
+    this.wizLightService.randomizeLight(lightId).subscribe({
+      next: (success) => {
+        if (!success) {
+          console.error('Failed to randomize light:', lightId);
+        }
+      }
+    });
+  }
+
+  onNameChange(event: {lightId: string, name: string}): void {
+    this.wizLightService.setLightName(event.lightId, event.name).subscribe({
+      next: (success) => {
+        if (!success) {
+          console.error('Failed to set name for light:', event.lightId);
+        }
+      }
+    });
+  }
+
   trackByLightId(index: number, light: WizLight): string {
     return light.id;
   }

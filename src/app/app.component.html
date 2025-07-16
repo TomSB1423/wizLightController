@@ -1,12 +1,12 @@
 <div class="app-container">
   <header class="app-header">
     <h1>🔆 {{ title }}</h1>
-    <button 
-      class="discover-btn" 
-      (click)="discoverLights()" 
+    <button
+      class="discover-btn"
+      (click)="discoverLights()"
       [disabled]="isDiscovering"
     >
-      {{ isDiscovering ? 'Discovering...' : 'Discover Lights' }}
+      {{ isDiscovering ? "Discovering..." : "Discover Lights" }}
     </button>
   </header>
 
@@ -14,16 +14,21 @@
     <div class="lights-grid">
       <div *ngIf="(lights$ | async)?.length === 0" class="no-lights">
         <p>No WiZ lights found.</p>
-        <p>Make sure your lights are connected to the same network and try discovering again.</p>
+        <p>
+          Make sure your lights are connected to the same network and try
+          discovering again.
+        </p>
       </div>
-      
-      <app-light-card 
+
+      <app-light-card
         *ngFor="let light of lights$ | async; trackBy: trackByLightId"
         [light]="light"
         (togglePower)="onTogglePower($event)"
         (brightnessChange)="onBrightnessChange($event)"
         (colorTempChange)="onColorTempChange($event)"
         (rgbChange)="onRgbChange($event)"
+        (randomize)="onRandomize($event)"
+        (nameChange)="onNameChange($event)"
       ></app-light-card>
     </div>
   </main>
