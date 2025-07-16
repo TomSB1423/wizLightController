@@ -584,24 +584,19 @@ export class LightCardComponent implements OnDestroy {
 
   onBrightnessChange(event: Event): void {
     const target = event.target as HTMLInputElement;
-    const brightness = parseInt(target.value);
+    let brightness = parseInt(target.value);
     
-    // If brightness is 0, turn off the light
-    if (brightness === 0) {
-      this.togglePower.emit(this.light.id);
-    } else {
-      // If brightness > 0 and light is off, turn it on first
-      if (!this.light.isOn) {
-        this.togglePower.emit(this.light.id);
-      }
-      
-      // Set the brightness (ensure minimum of 10% for WiZ lights when on)
-      const adjustedBrightness = Math.max(10, brightness);
-      this.brightnessChange.emit({
-        lightId: this.light.id,
-        brightness: adjustedBrightness
-      });
+    // If brightness is between 1-9, snap to 0 (turn off) since WiZ lights minimum is 10%
+    if (brightness > 0 && brightness < 10) {
+      brightness = 0;
+      // Update the slider visual to reflect the snap
+      target.value = '0';
     }
+    
+    this.brightnessChange.emit({
+      lightId: this.light.id,
+      brightness: brightness
+    });
   }
 
   onColorTempChange(event: Event): void {

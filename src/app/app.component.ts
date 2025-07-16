@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
 import { WizLight } from './models/wiz-light.interface';
 import { WizLightService } from './services/wiz-light.service';
@@ -9,7 +8,7 @@ import { LightCardComponent } from './components/light-card.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, LightCardComponent],
+  imports: [CommonModule, LightCardComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

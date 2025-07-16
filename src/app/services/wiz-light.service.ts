@@ -68,7 +68,7 @@ class WizLightImpl implements WizLight {
   }
 
   updateDimming(dimming: number) {
-    this.dimming = Math.max(10, Math.min(100, dimming));
+    this.dimming = Math.max(1, Math.min(100, dimming));
     this.lastSeen = new Date();
   }
 
@@ -233,21 +233,32 @@ export class WizLightService {
       return of(false);
     }
 
-    brightness = Math.max(10, Math.min(100, brightness)); // WiZ range: 10-100
+    brightness = Math.max(0, Math.min(100, brightness)); // Allow 0-100 range
 
-    // Make sure light is on when setting brightness
-    const params: any = { dimming: brightness };
-    if (!light.state) {
-      params.state = true;
+    // If brightness is less than 10, turn the light off (WiZ hardware minimum is 10)
+    if (brightness < 10) {
+      return this.sendCommand(light.ip, {
+        method: 'setPilot',
+        params: { state: false }
+      }).pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+    } else {
+      // Ensure light is on and set brightness
+      const params: any = { dimming: brightness };
+      if (!light.state) {
+        params.state = true;
+      }
+
+      return this.sendCommand(light.ip, {
+        method: 'setPilot',
+        params: params
+      }).pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
     }
-
-    return this.sendCommand(light.ip, {
-      method: 'setPilot',
-      params: params
-    }).pipe(
-      map(() => true), // State will be updated by sendCommand via server response
-      catchError(() => of(false))
-    );
   }
 
   setColorTemperature(lightId: string, colorTemp: number): Observable<boolean> {
