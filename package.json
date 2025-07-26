@@ -1,12 +1,18 @@
 {
   "name": "wiz-light-controller",
   "version": "0.0.0",
+  "main": "electron.js",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "electron": "electron .",
+    "electron-dev": "concurrently \"npm start\" \"wait-on http://localhost:4200 && electron .\"",
+    "build-electron": "ng build --configuration production && electron-builder",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "private": true,
   "dependencies": {
@@ -27,12 +33,41 @@
     "@angular/cli": "^18.2.19",
     "@angular/compiler-cli": "^18.2.0",
     "@types/jasmine": "~5.1.0",
+    "concurrently": "^8.2.2",
+    "electron": "^32.3.3",
+    "electron-builder": "^25.1.8",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.5.2"
+    "typescript": "~5.5.2",
+    "wait-on": "^8.0.4"
+  },
+  "build": {
+    "appId": "com.wizlightcontroller.app",
+    "productName": "WiZ Light Controller",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "electron.js",
+      "preload.js",
+      "public/favicon.ico",
+      "node_modules/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }

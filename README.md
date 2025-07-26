@@ -39,43 +39,90 @@ A modern web application for discovering and controlling WiZ smart lights on you
 - **npm** (v9 or later)
 - **WiZ lights** connected to the same network as your computer
 
-## 🚀 Installation
+## 🚀 Installation & Setup
 
-### 1. Clone the Repository
+### Choose Your Approach
+
+**🎯 Electron Desktop App (Recommended)**
+- ✅ Full WiZ light functionality 
+- ✅ No separate server needed
+- ✅ Direct UDP networking access
+- ✅ Works as a standalone desktop application
+- ✅ Cross-platform (Windows, macOS, Linux)
+
+**🌐 Browser + Separate Server**
+- ✅ Traditional web app experience
+- ✅ Can run on any device with a browser
+- ❌ Requires running separate Node.js server
+- ❌ More complex setup process
+
+### Installation
+
+1. **Clone the Repository**
 
 ```bash
 git clone https://github.com/yourusername/wizLightController.git
 cd wizLightController
 ```
 
-### 2. Install Frontend Dependencies
+2. **Install Dependencies**
 
 ```bash
 npm install
-```
-
-### 3. Install Backend Dependencies
-
-```bash
-cd discovery-server
-npm install
-cd ..
 ```
 
 ## 🏃‍♂️ Running the Application
 
-### Method 1: Start Both Services Manually
+### Method 1: Electron Desktop App (Recommended for Full Functionality)
+
+The Electron version provides direct access to UDP networking for WiZ light discovery and control without requiring a separate server.
+
+1. **Install Dependencies**:
+
+```bash
+npm install
+```
+
+2. **Run in Development Mode**:
+
+```bash
+npm run electron-dev
+```
+
+This will:
+
+- Start the Angular development server
+- Wait for it to be ready
+- Launch the Electron app
+
+3. **Build for Production**:
+
+```bash
+# Build the Angular app for production
+npm run build
+
+# Package as Electron app
+npm run pack
+
+# Or create distributables
+npm run dist
+```
+
+### Method 2: Separate Server + Browser (Original Method)
+
+This method requires running both the discovery server and Angular app separately.
 
 1. **Start the Discovery Server** (Terminal 1):
 
 ```bash
 cd discovery-server
+npm install
 npm start
 ```
 
 The server will start on `http://localhost:3001`
 
-1. **Start the Angular App** (Terminal 2):
+2. **Start the Angular App** (Terminal 2):
 
 ```bash
 npm start
@@ -83,7 +130,7 @@ npm start
 
 The app will start on `http://localhost:4200`
 
-### Method 2: Development Scripts
+### Method 3: Development Scripts (Browser Version)
 
 You can also use the npm scripts defined in package.json:
 
