@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, interval, of } from 'rxjs';
 import { map, catchError, tap, switchMap } from 'rxjs/operators';
-import { 
-  WizLight, 
-  WizLightCommand, 
-  WizLightResponse, 
+import {
+  WizLight,
+  WizLightCommand,
+  WizLightResponse,
   DiscoveryServerResponse,
   LightTestResponse,
   CommandResponse,
@@ -110,23 +110,23 @@ declare global {
 export class WizLightElectronService implements LightControlService {
   private lightsSubject = new BehaviorSubject<WizLight[]>([]);
   public lights$ = this.lightsSubject.asObservable();
-  
+
   private discoveredLights: Map<string, WizLight> = new Map();
   private readonly LIGHT_NAMES_STORAGE_KEY = 'wizLightController_lightNames';
   private isElectron = false;
-  
+
   constructor() {
     // Check if running in Electron
     this.isElectron = !!(window && window.electronAPI);
-    
+
     if (!this.isElectron) {
       console.warn('Not running in Electron environment - WiZ light functionality will be limited');
       return;
     }
-    
+
     // Start with real discovery
     this.discoverLights().subscribe();
-    
+
     // Set up periodic status updates
     interval(30000).subscribe(() => {
       this.updateLightStatuses();
@@ -140,19 +140,19 @@ export class WizLightElectronService implements LightControlService {
     }
 
     console.log('Discovering WiZ lights via Electron...');
-    
+
     return new Observable(observer => {
       window.electronAPI!.discoverLights()
         .then(response => {
           if (response.success && response.lights) {
             // Load stored custom names
             const storedNames = this.loadStoredLightNames();
-            
+
             const lights = response.lights.map((lightData) => {
               const lightId = lightData.mac || lightData.ip;
               const storedName = storedNames[lightId];
               const lightName = storedName || this.generateLightName(lightData.ip);
-              
+
               return new WizLightImpl(
                 lightId, // Use MAC as ID, fallback to IP
                 lightData.ip,
@@ -176,13 +176,13 @@ export class WizLightElectronService implements LightControlService {
             });
 
             console.log(`Discovered ${lights.length} lights`);
-            
+
             // Clear existing lights and add discovered ones
             this.discoveredLights.clear();
             lights.forEach(light => {
               this.discoveredLights.set(light.id, light);
             });
-            
+
             this.lightsSubject.next(Array.from(this.discoveredLights.values()));
             observer.next(lights);
             observer.complete();
@@ -245,7 +245,7 @@ export class WizLightElectronService implements LightControlService {
 
     const lights = Array.from(this.discoveredLights.values());
     console.log(`Updating status for ${lights.length} lights...`);
-    
+
     lights.forEach(async (light) => {
       try {
         const result = await this.testLight(light.ip);
@@ -263,7 +263,7 @@ export class WizLightElectronService implements LightControlService {
         }
       }
     });
-    
+
     this.lightsSubject.next(Array.from(this.discoveredLights.values()));
   }
 
@@ -275,7 +275,7 @@ export class WizLightElectronService implements LightControlService {
     try {
       const command = { method: "getPilot", params: {} };
       const result = await window.electronAPI.sendCommand(ip, command);
-      
+
       if (result.success && result.response && result.response.result) {
         const resultData = result.response.result;
         const light: DiscoveredLightData = {
@@ -293,7 +293,7 @@ export class WizLightElectronService implements LightControlService {
           rssi: resultData.rssi || 0,
           lastSeen: new Date().toISOString()
         };
-        
+
         return { success: true, light };
       } else {
         return { success: false, error: 'No result in response' };
@@ -340,7 +340,7 @@ export class WizLightElectronService implements LightControlService {
       };
 
       const result = await window.electronAPI.sendCommand(light.ip, command);
-      
+
       if (result.success) {
         if (light instanceof WizLightImpl) {
           light.updateState(newState);
@@ -375,14 +375,14 @@ export class WizLightElectronService implements LightControlService {
     try {
       const command: WizLightCommand = {
         method: "setPilot",
-        params: { 
+        params: {
           state: true, // Ensure light is on when setting brightness
-          dimming: clampedBrightness 
+          dimming: clampedBrightness
         }
       };
 
       const result = await window.electronAPI.sendCommand(light.ip, command);
-      
+
       if (result.success) {
         if (light instanceof WizLightImpl) {
           light.updateState(true);
@@ -418,14 +418,14 @@ export class WizLightElectronService implements LightControlService {
     try {
       const command: WizLightCommand = {
         method: "setPilot",
-        params: { 
+        params: {
           state: true,
-          temp: clampedTemp 
+          temp: clampedTemp
         }
       };
 
       const result = await window.electronAPI.sendCommand(light.ip, command);
-      
+
       if (result.success) {
         if (light instanceof WizLightImpl) {
           light.updateState(true);
@@ -458,13 +458,13 @@ export class WizLightElectronService implements LightControlService {
     const clampedR = Math.max(0, Math.min(255, r));
     const clampedG = Math.max(0, Math.min(255, g));
     const clampedB = Math.max(0, Math.min(255, b));
-    
+
     console.log(`Setting RGB for light ${light.ip} to (${clampedR}, ${clampedG}, ${clampedB})`);
 
     try {
       const command: WizLightCommand = {
         method: "setPilot",
-        params: { 
+        params: {
           state: true,
           r: clampedR,
           g: clampedG,
@@ -473,7 +473,7 @@ export class WizLightElectronService implements LightControlService {
       };
 
       const result = await window.electronAPI.sendCommand(light.ip, command);
-      
+
       if (result.success) {
         if (light instanceof WizLightImpl) {
           light.updateState(true);
@@ -495,7 +495,7 @@ export class WizLightElectronService implements LightControlService {
     const r = Math.floor(Math.random() * 256);
     const g = Math.floor(Math.random() * 256);
     const b = Math.floor(Math.random() * 256);
-    
+
     return this.setRGB(lightId, r, g, b);
   }
 

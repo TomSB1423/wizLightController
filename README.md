@@ -1,263 +1,138 @@
 # 🔆 WiZ Light Controller
 
-A modern web application for discovering and controlling WiZ smart lights on your local network. Built with Angular 18 and a Node.js discovery server.
+A modern desktop application for discovering and controlling WiZ smart lights on your local network. Built with Angular 18 and Electron for seamless UDP networking.
 
 ![WiZ Light Controller](https://img.shields.io/badge/Angular-18-red?style=flat-square&logo=angular)
-![Node.js](https://img.shields.io/badge/Node.js-Express-green?style=flat-square&logo=node.js)
+![Electron](https://img.shields.io/badge/Electron-32-blue?style=flat-square&logo=electron)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?style=flat-square&logo=typescript)
+
+## 📸 Screenshots
+
+![WiZ Light Controller App](demos/app.png)
 
 ## ✨ Features
 
 - 🔍 **Auto-Discovery**: Automatically discover WiZ lights on your network (works even when lights are turned off)
-- 💡 **Light Control**: Power on/off, brightness adjustment, RGB color control
-- 🎨 **Color Picker**: HTML5 color picker with live preview
-- 🎲 **Randomize**: Generate random colors with one click
-- ✏️ **Custom Names**: Click to edit light names with localStorage persistence
-- 📱 **Responsive Design**: Works on desktop and mobile devices
-- ⚡ **Real-time Updates**: Live status updates and smooth animations
-- 🚀 **Debounced Controls**: Optimized performance during manual adjustments
+- 💡 **Complete Light Control**: Power, brightness, RGB colors, and color temperature
+- 🎨 **Color Tools**: HTML5 color picker and random color generator
+- ✏️ **Custom Names**: Editable light names with persistent storage
+- 🌙 **Modern Dark UI**: Clean, minimal interface with smooth animations
+- 🖥️ **Native Desktop App**: Cross-platform Electron application with direct UDP networking
+- ⚡ **Real-time Updates**: Live status monitoring and responsive controls
 
-## 🛠️ Technology Stack
+## 🚀 Installation
 
-### Frontend
-
-- **Angular 18** - Modern web framework with standalone components
-- **TypeScript** - Type-safe development
-- **RxJS** - Reactive programming for real-time updates
-- **CSS3** - Modern styling with animations and transitions
-
-### Backend
-
-- **Node.js** - JavaScript runtime
-- **Express.js** - Web server framework
-- **UDP Broadcasting** - WiZ light discovery protocol
-- **CORS** - Cross-origin resource sharing
-
-## 📋 Prerequisites
+### Prerequisites
 
 - **Node.js** (v18 or later)
 - **npm** (v9 or later)
-- **WiZ lights** connected to the same network as your computer
+- **WiZ lights** connected to the same network
 
-## 🚀 Installation & Setup
+### Setup
 
-### Choose Your Approach
-
-**🎯 Electron Desktop App (Recommended)**
-- ✅ Full WiZ light functionality 
-- ✅ No separate server needed
-- ✅ Direct UDP networking access
-- ✅ Works as a standalone desktop application
-- ✅ Cross-platform (Windows, macOS, Linux)
-
-**🌐 Browser + Separate Server**
-- ✅ Traditional web app experience
-- ✅ Can run on any device with a browser
-- ❌ Requires running separate Node.js server
-- ❌ More complex setup process
-
-### Installation
-
-1. **Clone the Repository**
+1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/wizLightController.git
+git clone https://github.com/TomSB1423/wizLightController.git
 cd wizLightController
 ```
 
-2. **Install Dependencies**
+2. **Install dependencies**
 
 ```bash
 npm install
 ```
 
-## 🏃‍♂️ Running the Application
-
-### Method 1: Electron Desktop App (Recommended for Full Functionality)
-
-The Electron version provides direct access to UDP networking for WiZ light discovery and control without requiring a separate server.
-
-1. **Install Dependencies**:
-
-```bash
-npm install
-```
-
-2. **Run in Development Mode**:
+3. **Run the application**
 
 ```bash
 npm run electron-dev
 ```
 
-This will:
-
-- Start the Angular development server
-- Wait for it to be ready
-- Launch the Electron app
-
-3. **Build for Production**:
+### Production Build
 
 ```bash
-# Build the Angular app for production
+# Build for production
 npm run build
 
-# Package as Electron app
+# Create executable
 npm run pack
 
-# Or create distributables
+# Create installer
 npm run dist
-```
-
-### Method 2: Separate Server + Browser (Original Method)
-
-This method requires running both the discovery server and Angular app separately.
-
-1. **Start the Discovery Server** (Terminal 1):
-
-```bash
-cd discovery-server
-npm install
-npm start
-```
-
-The server will start on `http://localhost:3001`
-
-2. **Start the Angular App** (Terminal 2):
-
-```bash
-npm start
-```
-
-The app will start on `http://localhost:4200`
-
-### Method 3: Development Scripts (Browser Version)
-
-You can also use the npm scripts defined in package.json:
-
-```bash
-# Start the Angular development server
-npm run start
-
-# Build the project for production
-npm run build
-
-# Watch for changes during development
-npm run watch
 ```
 
 ## 📖 Usage
 
-### 1. Discover Lights
-
-- Open your browser to `http://localhost:4200`
-- Click the "Discover Lights" button
-- The app will automatically find WiZ lights on your network
-
-### 2. Control Your Lights
-
-- **Power**: Toggle lights on/off with the switch
-- **Brightness**: Use the slider (0-100%)
-- **RGB Colors**: Adjust individual R, G, B sliders (0-255)
-- **Color Picker**: Click the color square to open a color picker
-- **Randomize**: Click "🎨 Randomize" for random colors
-
-### 3. Customize Light Names
-
-- Click on any light title to edit its name
-- Press **Enter** to save or **Escape** to cancel
-- Names are automatically saved and persist across sessions
-
-## 🔧 Configuration
-
-### Discovery Server Settings
-
-The discovery server can be configured in `discovery-server/server.js`:
-
-```javascript
-const PORT = 3001; // Server port
-const WIZ_PORT = 38899; // WiZ UDP port
-const BROADCAST_TIMEOUT = 3000; // Discovery timeout
-```
-
-### Frontend Settings
-
-API endpoint configuration in `src/app/services/wiz-light.service.ts`:
-
-```typescript
-private readonly discoveryServerUrl = 'http://localhost:3001/api';
-```
-
-## 📁 Project Structure
-
-```
-wizLightController/
-├── src/                          # Angular frontend
-│   ├── app/
-│   │   ├── components/           # UI components
-│   │   │   └── light-card.component.ts
-│   │   ├── models/               # TypeScript interfaces
-│   │   │   └── wiz-light.interface.ts
-│   │   ├── services/             # Business logic
-│   │   │   └── wiz-light.service.ts
-│   │   ├── app.component.ts      # Main app component
-│   │   └── app.config.ts         # App configuration
-│   ├── index.html                # Main HTML file
-│   └── styles.css                # Global styles
-├── discovery-server/             # Node.js backend
-│   ├── server.js                 # Express server
-│   └── package.json              # Server dependencies
-├── package.json                  # Frontend dependencies
-└── README.md                     # Documentation
-```
-
-## 🎨 Features in Detail
-
-### Smart Discovery
-
-- UDP broadcast to find WiZ lights automatically
-- Real-time connection status monitoring
-- Automatic retry and error handling
-
-### Intuitive Controls
-
-- Smooth CSS animations and transitions
-- Debounced input for optimal performance
-- Visual feedback for all interactions
-
-### Persistent Storage
-
-- Light names saved in localStorage
-- Settings persist across browser sessions
-- Graceful fallback for storage errors
-
-## 🐛 Troubleshooting
-
-### No Lights Found
-
-1. Ensure WiZ lights are powered on and connected to WiFi (note: lights can be discovered even when turned off)
-2. Verify your computer is on the same network as the lights
-3. Check that port 38899 (UDP) is not blocked by firewall
-4. Try clicking "Discover Lights" again
-
-### Connection Issues
-
-1. Restart the discovery server: `cd discovery-server && npm start`
-2. Clear browser cache and refresh the page
-3. Check browser console for error messages
-
-### Performance Issues
-
-1. Close other browser tabs consuming resources
-2. Ensure Node.js and npm are up to date
-3. Try restarting both the server and Angular app
+1. Launch the application
+2. Click "Discover Lights" to find WiZ lights on your network
+3. Control your lights using the intuitive interface:
+   - Toggle power with the switch
+   - Adjust brightness with the slider
+   - Change colors using RGB sliders or color picker
+   - Randomize colors with one click
+   - Edit light names by clicking on the title
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Commit your changes: `git commit -am 'Add feature'`
-4. Push to the branch: `git push origin feature-name`
-5. Submit a pull request
+We welcome contributions! Here's how you can help:
+
+### Getting Started
+
+1. **Fork the repository** on GitHub
+2. **Clone your fork** locally:
+   ```bash
+   git clone https://github.com/yourusername/wizLightController.git
+   ```
+3. **Create a feature branch**:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+### Development Guidelines
+
+- **Code Style**: Follow existing TypeScript and Angular conventions
+- **Commits**: Use clear, descriptive commit messages
+- **Testing**: Test your changes thoroughly with actual WiZ lights
+- **Documentation**: Update documentation for new features
+
+### Submitting Changes
+
+1. **Commit your changes**:
+   ```bash
+   git commit -am 'Add: brief description of your feature'
+   ```
+2. **Push to your fork**:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+3. **Create a Pull Request** on GitHub with:
+   - Clear description of changes
+   - Screenshots/videos for UI changes
+   - Testing information
+
+### Areas for Contribution
+
+- 🐛 **Bug Fixes**: Report and fix issues
+- ✨ **New Features**: Light scheduling, scenes, groups
+- 🎨 **UI/UX**: Design improvements and accessibility
+- 📚 **Documentation**: Improve guides and examples
+- 🧪 **Testing**: Add automated tests
+- 🌍 **Localization**: Multi-language support
+
+## 🐛 Troubleshooting
+
+**No lights found?**
+
+- Ensure lights are on the same network
+- Check firewall settings for UDP port 38899
+- Verify lights are powered (they can be discovered when off)
+
+**App won't start?**
+
+- Update Node.js and npm to latest versions
+- Try `npm install` again
+- Check for port conflicts
 
 ## 📄 License
 
@@ -267,7 +142,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [WiZ Connected](https://www.wizconnected.com/) for the smart light protocol
 - [Angular Team](https://angular.io/) for the excellent framework
-- [Express.js](https://expressjs.com/) for the web server framework
+- [Electron](https://electronjs.org/) for cross-platform desktop development
 
 ---
 

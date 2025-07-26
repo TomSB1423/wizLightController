@@ -10,15 +10,15 @@ import { WizLight } from '../models/wiz-light.interface';
   template: `
     <div class="light-card" [class.offline]="!light.isConnected">
       <div class="light-header">
-        <h3 
-          *ngIf="!isEditingName" 
-          class="light-title" 
+        <h3
+          *ngIf="!isEditingName"
+          class="light-title"
           (click)="startEditingName()"
           [title]="'Click to edit name'"
         >
           {{ light.name || 'Unnamed Light' }}
         </h3>
-        <input 
+        <input
           *ngIf="isEditingName"
           #nameInput
           type="text"
@@ -34,7 +34,7 @@ import { WizLight } from '../models/wiz-light.interface';
           {{ light.isConnected ? 'Online' : 'Offline' }}
         </div>
       </div>
-      
+
       <div class="light-info">
         <p><strong>IP:</strong> {{ light.ip }}</p>
         <p><strong>Last Seen:</strong> {{ light.lastSeen | date:'short' }}</p>
@@ -44,9 +44,9 @@ import { WizLight } from '../models/wiz-light.interface';
         <!-- Power Toggle -->
         <div class="control-group">
           <label class="power-toggle">
-            <input 
-              type="checkbox" 
-              [checked]="light.isOn" 
+            <input
+              type="checkbox"
+              [checked]="light.isOn"
               [disabled]="!light.isConnected"
               (change)="onTogglePower()"
             />
@@ -58,10 +58,10 @@ import { WizLight } from '../models/wiz-light.interface';
         <!-- Brightness Control -->
         <div class="control-group">
           <label>Brightness: {{ light.isOn ? (light.brightness || 0) : 0 }}%</label>
-          <input 
-            type="range" 
-            min="0" 
-            max="100" 
+          <input
+            type="range"
+            min="0"
+            max="100"
             [value]="light.isOn ? (light.brightness || 10) : 0"
             [disabled]="!light.isConnected"
             (input)="onBrightnessChange($event)"
@@ -72,10 +72,10 @@ import { WizLight } from '../models/wiz-light.interface';
         <!-- Color Temperature Control (if available) -->
         <div class="control-group" *ngIf="light.colorTemp">
           <label>Color Temperature: {{ light.colorTemp || 4000 }}K</label>
-          <input 
-            type="range" 
-            min="2200" 
-            max="6500" 
+          <input
+            type="range"
+            min="2200"
+            max="6500"
             [value]="light.colorTemp || 4000"
             [disabled]="!light.isConnected || !light.isOn"
             (input)="onColorTempChange($event)"
@@ -89,10 +89,10 @@ import { WizLight } from '../models/wiz-light.interface';
           <div class="rgb-controls" [class.dimmed]="!light.isOn">
             <div class="rgb-input">
               <label>R:</label>
-              <input 
-                type="range" 
-                min="0" 
-                max="255" 
+              <input
+                type="range"
+                min="0"
+                max="255"
                 [value]="light.rgb.r"
                 [disabled]="!light.isConnected || !light.isOn"
                 (input)="onRgbChange('r', $event)"
@@ -102,10 +102,10 @@ import { WizLight } from '../models/wiz-light.interface';
             </div>
             <div class="rgb-input">
               <label>G:</label>
-              <input 
-                type="range" 
-                min="0" 
-                max="255" 
+              <input
+                type="range"
+                min="0"
+                max="255"
                 [value]="light.rgb.g"
                 [disabled]="!light.isConnected || !light.isOn"
                 (input)="onRgbChange('g', $event)"
@@ -115,10 +115,10 @@ import { WizLight } from '../models/wiz-light.interface';
             </div>
             <div class="rgb-input">
               <label>B:</label>
-              <input 
-                type="range" 
-                min="0" 
-                max="255" 
+              <input
+                type="range"
+                min="0"
+                max="255"
                 [value]="light.rgb.b"
                 [disabled]="!light.isConnected || !light.isOn"
                 (input)="onRgbChange('b', $event)"
@@ -128,8 +128,8 @@ import { WizLight } from '../models/wiz-light.interface';
             </div>
             <div class="color-picker-container">
               <label>Color Picker:</label>
-              <input 
-                type="color" 
+              <input
+                type="color"
                 [value]="rgbToHex(light.rgb.r, light.rgb.g, light.rgb.b)"
                 [disabled]="!light.isConnected || !light.isOn"
                 (input)="onColorPickerChange($event)"
@@ -142,7 +142,7 @@ import { WizLight } from '../models/wiz-light.interface';
 
         <!-- Random Colors Button -->
         <div class="control-group">
-          <button 
+          <button
             class="random-button"
             [disabled]="!light.isConnected"
             (click)="onRandomize()"
@@ -683,7 +683,7 @@ export class LightCardComponent implements OnDestroy {
 
   private rgbDebounceTimer: any;
   private isDragging = false;
-  
+
   // Name editing properties
   public isEditingName = false;
   public editingName = '';
@@ -695,14 +695,14 @@ export class LightCardComponent implements OnDestroy {
   onBrightnessChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     let brightness = parseInt(target.value);
-    
+
     // If brightness is between 1-9, snap to 0 (turn off) since WiZ lights minimum is 10%
     if (brightness > 0 && brightness < 10) {
       brightness = 0;
       // Update the slider visual to reflect the snap
       target.value = '0';
     }
-    
+
     this.brightnessChange.emit({
       lightId: this.light.id,
       brightness: brightness
@@ -721,19 +721,19 @@ export class LightCardComponent implements OnDestroy {
   onRgbChange(component: 'r' | 'g' | 'b', event: Event): void {
     const target = event.target as HTMLInputElement;
     const value = parseInt(target.value);
-    
+
     // Create RGB object if it doesn't exist
     const newRgb = this.light.rgb ? { ...this.light.rgb } : { r: 0, g: 0, b: 0 };
     newRgb[component] = value;
-    
+
     // Clear existing timer
     if (this.rgbDebounceTimer) {
       clearTimeout(this.rgbDebounceTimer);
     }
-    
+
     // Set dragging state
     this.isDragging = true;
-    
+
     // Debounce the actual light update during manual dragging
     this.rgbDebounceTimer = setTimeout(() => {
       this.rgbChange.emit({
@@ -767,12 +767,12 @@ export class LightCardComponent implements OnDestroy {
     const target = event.target as HTMLInputElement;
     const hexColor = target.value;
     const rgb = this.hexToRgb(hexColor);
-    
+
     // Clear any pending debounced updates since this is immediate
     if (this.rgbDebounceTimer) {
       clearTimeout(this.rgbDebounceTimer);
     }
-    
+
     this.rgbChange.emit({
       lightId: this.light.id,
       r: rgb.r,
@@ -786,17 +786,17 @@ export class LightCardComponent implements OnDestroy {
     if (this.rgbDebounceTimer) {
       clearTimeout(this.rgbDebounceTimer);
     }
-    
+
     this.randomize.emit(this.light.id);
   }
 
   // Name editing methods
   startEditingName(): void {
     if (!this.light.isConnected) return;
-    
+
     this.isEditingName = true;
     this.editingName = this.light.name || '';
-    
+
     // Focus the input after the view updates
     setTimeout(() => {
       const input = document.querySelector('.name-input') as HTMLInputElement;

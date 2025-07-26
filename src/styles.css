@@ -8,25 +8,25 @@
   --bg-tertiary: #1e1e20;
   --bg-card: #212124;
   --bg-card-hover: #26262a;
-  
+
   /* Text colors */
   --text-primary: #ffffff;
   --text-secondary: #b3b3b3;
   --text-tertiary: #808080;
   --text-muted: #666666;
-  
+
   /* Accent colors */
   --accent-primary: #3b82f6;
   --accent-primary-hover: #2563eb;
   --accent-secondary: #10b981;
   --accent-warning: #f59e0b;
   --accent-danger: #ef4444;
-  
+
   /* Border and divider colors */
   --border-primary: #2a2a2d;
   --border-secondary: #3a3a3d;
   --border-hover: #4a4a4d;
-  
+
   /* Shadow and glow effects */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
@@ -34,12 +34,12 @@
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
   --glow-blue: 0 0 20px rgba(59, 130, 246, 0.3);
   --glow-green: 0 0 20px rgba(16, 185, 129, 0.3);
-  
+
   /* Animation durations */
   --duration-fast: 150ms;
   --duration-normal: 250ms;
   --duration-slow: 350ms;
-  
+
   /* Border radius */
   --radius-sm: 6px;
   --radius-md: 8px;

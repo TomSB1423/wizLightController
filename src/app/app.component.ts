@@ -2,7 +2,6 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { WizLight } from './models/wiz-light.interface';
-import { WizLightService } from './services/wiz-light.service';
 import { WizLightElectronService } from './services/wiz-light-electron.service';
 import { LightControlService } from './services/light-control.interface';
 import { LightCardComponent } from './components/light-card.component';
@@ -11,7 +10,7 @@ import { LightCardComponent } from './components/light-card.component';
 export function lightServiceFactory(): LightControlService {
   // Check if running in Electron
   const isElectron = !!(window && (window as any).electronAPI);
-  
+
   if (isElectron) {
     return new WizLightElectronService();
   } else {
