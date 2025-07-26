@@ -1,10 +1,16 @@
 # 🔆 WiZ Light Controller
 
-A modern desktop application for discovering and controlling WiZ smart lights on your local network. Built with Angular 18 and Electron for seamless UDP networking.
+A modern desktop application for discovering and controlling [WiZ smart lights](https://www.wizconnected.com/en-gb/products/bulbs) on your local network.
+
+Built with:
 
 ![WiZ Light Controller](https://img.shields.io/badge/Angular-18-red?style=flat-square&logo=angular)
 ![Electron](https://img.shields.io/badge/Electron-32-blue?style=flat-square&logo=electron)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?style=flat-square&logo=typescript)
+
+> Born from the need for a simple, native desktop app to control WiZ lights without the hassle of browser limitations or server setup.
+
+![Wiz Light Product](./demos/wiz-light.png)
 
 ## 📸 Screenshots
 
@@ -75,19 +81,11 @@ npm run dist
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
+Here's how you can help:
 
 ### Getting Started
 
-1. **Fork the repository** on GitHub
-2. **Clone your fork** locally:
-   ```bash
-   git clone https://github.com/yourusername/wizLightController.git
-   ```
-3. **Create a feature branch**:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+**Fork the repository** and submit a pull request with your changes!
 
 ### Development Guidelines
 
@@ -97,19 +95,6 @@ We welcome contributions! Here's how you can help:
 - **Documentation**: Update documentation for new features
 
 ### Submitting Changes
-
-1. **Commit your changes**:
-   ```bash
-   git commit -am 'Add: brief description of your feature'
-   ```
-2. **Push to your fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-3. **Create a Pull Request** on GitHub with:
-   - Clear description of changes
-   - Screenshots/videos for UI changes
-   - Testing information
 
 ### Areas for Contribution
 
@@ -145,5 +130,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Electron](https://electronjs.org/) for cross-platform desktop development
 
 ---
-
-**Made with ❤️ for smart home enthusiasts**
