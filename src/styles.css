@@ -87,3 +87,45 @@ html, body {
   background: var(--accent-primary);
   color: white;
 }
+
+/* Global color picker positioning improvements */
+input[type="color"] {
+  /* Ensure color pickers are positioned within viewport when possible */
+  position: relative;
+  z-index: 9999;
+}
+
+/* Browser-specific color picker improvements */
+input[type="color"]::-webkit-color-swatch-wrapper {
+  /* WebKit browsers - try to constrain within viewport */
+  position: relative;
+}
+
+input[type="color"]::-moz-color-swatch {
+  /* Firefox - try to constrain within viewport */
+  position: relative;
+}
+
+/* Ensure body allows proper positioning */
+body {
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+/* Prevent color picker from causing horizontal scrolling */
+.light-card {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Media query for smaller screens to ensure color picker stays in bounds */
+@media (max-width: 768px) {
+  .color-picker-container {
+    align-items: center !important;
+  }
+  
+  input[type="color"] {
+    position: relative;
+    margin: 0 auto;
+  }
+}

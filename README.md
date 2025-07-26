@@ -12,6 +12,8 @@ Built with:
 
 ![Wiz Light Product](./demos/wiz-light.png)
 
+^ not ai generated :)
+
 ## 📸 Screenshots
 
 ![WiZ Light Controller App](demos/app.png)
@@ -20,11 +22,12 @@ Built with:
 
 - 🔍 **Auto-Discovery**: Automatically discover WiZ lights on your network (works even when lights are turned off)
 - 💡 **Complete Light Control**: Power, brightness, RGB colors, and color temperature
-- 🎨 **Color Tools**: HTML5 color picker and random color generator
+- 🎨 **Advanced Color Tools**: HTML5 color picker and random color generator with input-only behavior
 - ✏️ **Custom Names**: Editable light names with persistent storage
 - 🌙 **Modern Dark UI**: Clean, minimal interface with smooth animations
 - 🖥️ **Native Desktop App**: Cross-platform Electron application with direct UDP networking
 - ⚡ **Real-time Updates**: Live status monitoring and responsive controls
+- 🎛️ **Smart UI**: Input-only sliders and color picker prevent feedback loops for smooth interaction
 
 ## 🚀 Installation
 

@@ -1,44 +1,23 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { WizLight } from './models/wiz-light.interface';
 import { WizLightElectronService } from './services/wiz-light-electron.service';
-import { WizLightMockService } from './services/wiz-light-mock.service';
-import { LightControlService } from './services/light-control.interface';
 import { LightCardComponent } from './components/light-card.component';
-
-// Factory function to provide the right service based on environment
-export function lightServiceFactory(): LightControlService {
-  // Check if running in Electron
-  const isElectron = !!(window && (window as any).electronAPI);
-
-  if (isElectron) {
-    return new WizLightElectronService();
-  } else {
-    // Return mock service for browser/demo mode
-    return new WizLightMockService();
-  }
-}
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, LightCardComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
-  providers: [
-    {
-      provide: 'LightService',
-      useFactory: lightServiceFactory
-    }
-  ]
+  styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
   title = 'WiZ Light Controller';
   lights$: Observable<WizLight[]>;
   isDiscovering = false;
 
-  constructor(@Inject('LightService') private lightService: LightControlService) {
+  constructor(private lightService: WizLightElectronService) {
     this.lights$ = this.lightService.lights$;
   }
 

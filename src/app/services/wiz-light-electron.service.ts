@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, interval, of } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, interval, of, Subscription } from 'rxjs';
 import { map, catchError, tap, switchMap } from 'rxjs/operators';
 import {
   WizLight,
@@ -11,7 +11,6 @@ import {
   DiscoveredLightData,
   WizPilotParams
 } from '../models/wiz-light.interface';
-import { LightControlService } from './light-control.interface';
 
 // WizLight implementation class
 class WizLightImpl implements WizLight {
@@ -107,13 +106,20 @@ declare global {
 @Injectable({
   providedIn: 'root'
 })
-export class WizLightElectronService implements LightControlService {
+export class WizLightElectronService implements OnDestroy {
   private lightsSubject = new BehaviorSubject<WizLight[]>([]);
   public lights$ = this.lightsSubject.asObservable();
 
   private discoveredLights: Map<string, WizLight> = new Map();
   private readonly LIGHT_NAMES_STORAGE_KEY = 'wizLightController_lightNames';
   private isElectron = false;
+  private statusUpdateSubscription?: Subscription;
+
+  // Request throttling properties
+  private readonly MAX_CONCURRENT_REQUESTS = 3;
+  private readonly REQUEST_DELAY_MS = 500;
+  private readonly STATUS_UPDATE_INTERVAL_MS = 60000; // 1 minute instead of 30 seconds
+  private requestQueue: Map<string, Promise<any>> = new Map();
 
   constructor() {
     // Check if running in Electron
@@ -128,9 +134,24 @@ export class WizLightElectronService implements LightControlService {
     this.discoverLights().subscribe();
 
     // Set up periodic status updates
-    interval(30000).subscribe(() => {
-      this.updateLightStatuses();
+    this.statusUpdateSubscription = interval(this.STATUS_UPDATE_INTERVAL_MS).subscribe(() => {
+      this.updateLightStatuses().catch(error => {
+        console.error('Error updating light statuses:', error);
+      });
     });
+  }
+
+  ngOnDestroy(): void {
+    // Clean up subscriptions to prevent memory leaks
+    if (this.statusUpdateSubscription) {
+      this.statusUpdateSubscription.unsubscribe();
+    }
+
+    // Clear request queue
+    this.requestQueue.clear();
+
+    // Complete the lights subject
+    this.lightsSubject.complete();
   }
 
   discoverLights(): Observable<WizLight[]> {
@@ -240,31 +261,77 @@ export class WizLightElectronService implements LightControlService {
     return false;
   }
 
-  private updateLightStatuses(): void {
+  private async throttledRequest<T>(lightIp: string, requestFn: () => Promise<T>): Promise<T> {
+    // If there's already a request in progress for this light, wait for it
+    const existingRequest = this.requestQueue.get(lightIp);
+    if (existingRequest) {
+      await existingRequest.catch(() => {}); // Ignore errors from previous requests
+      // Add a delay between requests to the same light
+      await this.delay(this.REQUEST_DELAY_MS);
+    }
+
+    // Create and track the new request
+    const requestPromise = requestFn();
+    this.requestQueue.set(lightIp, requestPromise);
+
+    try {
+      const result = await requestPromise;
+      return result;
+    } finally {
+      // Clean up the request from queue
+      this.requestQueue.delete(lightIp);
+    }
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private async updateLightStatuses(): Promise<void> {
     if (!this.isElectron) return;
 
     const lights = Array.from(this.discoveredLights.values());
     console.log(`Updating status for ${lights.length} lights...`);
 
-    lights.forEach(async (light) => {
-      try {
-        const result = await this.testLight(light.ip);
-        if (result.success && result.light) {
-          this.updateLightFromData(light.id, result.light);
-        } else {
-          if (light instanceof WizLightImpl) {
-            light.updateConnectionStatus(false);
+    // Process lights in batches to avoid overwhelming them
+    const batches = this.chunkArray(lights, this.MAX_CONCURRENT_REQUESTS);
+
+    for (const batch of batches) {
+      await Promise.all(
+        batch.map(async (light) => {
+          try {
+            const result = await this.throttledRequest(light.ip, () => this.testLight(light.ip));
+            if (result.success && result.light) {
+              this.updateLightFromData(light.id, result.light);
+            } else {
+              if (light instanceof WizLightImpl) {
+                light.updateConnectionStatus(false);
+              }
+            }
+          } catch (error) {
+            console.error(`Failed to update status for light ${light.ip}:`, error);
+            if (light instanceof WizLightImpl) {
+              light.updateConnectionStatus(false);
+            }
           }
-        }
-      } catch (error) {
-        console.error(`Failed to update status for light ${light.ip}:`, error);
-        if (light instanceof WizLightImpl) {
-          light.updateConnectionStatus(false);
-        }
+        })
+      );
+
+      // Add delay between batches
+      if (batches.indexOf(batch) < batches.length - 1) {
+        await this.delay(this.REQUEST_DELAY_MS);
       }
-    });
+    }
 
     this.lightsSubject.next(Array.from(this.discoveredLights.values()));
+  }
+
+  private chunkArray<T>(array: T[], chunkSize: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
   }
 
   private async testLight(ip: string): Promise<LightTestResponse> {
@@ -339,7 +406,9 @@ export class WizLightElectronService implements LightControlService {
         params: { state: newState }
       };
 
-      const result = await window.electronAPI.sendCommand(light.ip, command);
+      const result = await this.throttledRequest(light.ip, () =>
+        window.electronAPI!.sendCommand(light.ip, command)
+      );
 
       if (result.success) {
         if (light instanceof WizLightImpl) {
@@ -381,7 +450,9 @@ export class WizLightElectronService implements LightControlService {
         }
       };
 
-      const result = await window.electronAPI.sendCommand(light.ip, command);
+      const result = await this.throttledRequest(light.ip, () =>
+        window.electronAPI!.sendCommand(light.ip, command)
+      );
 
       if (result.success) {
         if (light instanceof WizLightImpl) {
@@ -424,7 +495,9 @@ export class WizLightElectronService implements LightControlService {
         }
       };
 
-      const result = await window.electronAPI.sendCommand(light.ip, command);
+      const result = await this.throttledRequest(light.ip, () =>
+        window.electronAPI!.sendCommand(light.ip, command)
+      );
 
       if (result.success) {
         if (light instanceof WizLightImpl) {
@@ -472,7 +545,9 @@ export class WizLightElectronService implements LightControlService {
         }
       };
 
-      const result = await window.electronAPI.sendCommand(light.ip, command);
+      const result = await this.throttledRequest(light.ip, () =>
+        window.electronAPI!.sendCommand(light.ip, command)
+      );
 
       if (result.success) {
         if (light instanceof WizLightImpl) {

@@ -3,7 +3,9 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 import { WizLight } from '../models/wiz-light.interface';
 import { LightControlService } from './light-control.interface';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WizLightMockService implements LightControlService {
   private lightsSubject = new BehaviorSubject<WizLight[]>([]);
 

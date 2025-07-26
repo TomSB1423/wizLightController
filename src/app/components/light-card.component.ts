@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy, OnInit, OnChanges, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WizLight } from '../models/wiz-light.interface';
@@ -14,7 +14,7 @@ import { WizLight } from '../models/wiz-light.interface';
           *ngIf="!isEditingName"
           class="light-title"
           (click)="startEditingName()"
-          [title]="'Click to edit name'"
+          [title]="'Click to edit light name (text will be highlighted)'"
         >
           {{ light.name || 'Unnamed Light' }}
         </h3>
@@ -25,6 +25,8 @@ import { WizLight } from '../models/wiz-light.interface';
           class="name-input"
           [value]="editingName"
           (input)="editingName = $any($event.target).value"
+          (focus)="onInputFocus($event)"
+          (click)="onInputClick($event)"
           (blur)="finishEditingName()"
           (keyup.enter)="finishEditingName()"
           (keyup.escape)="cancelEditingName()"
@@ -62,9 +64,13 @@ import { WizLight } from '../models/wiz-light.interface';
             type="range"
             min="0"
             max="100"
-            [value]="light.isOn ? (light.brightness || 10) : 0"
+            [value]="localValues.brightness"
             [disabled]="!light.isConnected"
             (input)="onBrightnessChange($event)"
+            (mousedown)="startDrag('brightness')"
+            (mouseup)="endDrag('brightness')"
+            (touchstart)="startDrag('brightness')"
+            (touchend)="endDrag('brightness')"
             class="slider brightness-slider"
           />
         </div>
@@ -76,9 +82,13 @@ import { WizLight } from '../models/wiz-light.interface';
             type="range"
             min="2200"
             max="6500"
-            [value]="light.colorTemp || 4000"
+            [value]="localValues.colorTemp"
             [disabled]="!light.isConnected || !light.isOn"
             (input)="onColorTempChange($event)"
+            (mousedown)="startDrag('colorTemp')"
+            (mouseup)="endDrag('colorTemp')"
+            (touchstart)="startDrag('colorTemp')"
+            (touchend)="endDrag('colorTemp')"
             class="slider temp-slider"
           />
         </div>
@@ -93,9 +103,13 @@ import { WizLight } from '../models/wiz-light.interface';
                 type="range"
                 min="0"
                 max="255"
-                [value]="light.rgb.r"
+                [value]="localValues.rgbR"
                 [disabled]="!light.isConnected || !light.isOn"
                 (input)="onRgbChange('r', $event)"
+                (mousedown)="startDrag('rgbR')"
+                (mouseup)="endDrag('rgbR')"
+                (touchstart)="startDrag('rgbR')"
+                (touchend)="endDrag('rgbR')"
                 class="slider rgb-slider red"
               />
               <span>{{ light.rgb.r }}</span>
@@ -106,9 +120,13 @@ import { WizLight } from '../models/wiz-light.interface';
                 type="range"
                 min="0"
                 max="255"
-                [value]="light.rgb.g"
+                [value]="localValues.rgbG"
                 [disabled]="!light.isConnected || !light.isOn"
                 (input)="onRgbChange('g', $event)"
+                (mousedown)="startDrag('rgbG')"
+                (mouseup)="endDrag('rgbG')"
+                (touchstart)="startDrag('rgbG')"
+                (touchend)="endDrag('rgbG')"
                 class="slider rgb-slider green"
               />
               <span>{{ light.rgb.g }}</span>
@@ -119,9 +137,13 @@ import { WizLight } from '../models/wiz-light.interface';
                 type="range"
                 min="0"
                 max="255"
-                [value]="light.rgb.b"
+                [value]="localValues.rgbB"
                 [disabled]="!light.isConnected || !light.isOn"
                 (input)="onRgbChange('b', $event)"
+                (mousedown)="startDrag('rgbB')"
+                (mouseup)="endDrag('rgbB')"
+                (touchstart)="startDrag('rgbB')"
+                (touchend)="endDrag('rgbB')"
                 class="slider rgb-slider blue"
               />
               <span>{{ light.rgb.b }}</span>
@@ -130,9 +152,13 @@ import { WizLight } from '../models/wiz-light.interface';
               <label>Color Picker:</label>
               <input
                 type="color"
-                [value]="rgbToHex(light.rgb.r, light.rgb.g, light.rgb.b)"
+                [value]="rgbToHex(localValues.rgbR, localValues.rgbG, localValues.rgbB)"
                 [disabled]="!light.isConnected || !light.isOn"
                 (input)="onColorPickerChange($event)"
+                (mousedown)="startDrag('colorPicker')"
+                (mouseup)="endDrag('colorPicker')"
+                (touchstart)="startDrag('colorPicker')"
+                (touchend)="endDrag('colorPicker')"
                 class="color-picker"
                 title="Click to open color picker"
               />
@@ -232,6 +258,13 @@ import { WizLight } from '../models/wiz-light.interface';
       border-color: var(--accent-primary);
       transform: translateX(2px);
       box-shadow: var(--shadow-sm);
+      cursor: pointer;
+    }
+
+    .light-title:hover::after {
+      content: ' ✏️';
+      opacity: 0.7;
+      font-size: 0.875rem;
     }
 
     .name-input {
@@ -245,6 +278,16 @@ import { WizLight } from '../models/wiz-light.interface';
       outline: none;
       min-width: 140px;
       box-shadow: var(--glow-blue);
+    }
+
+    .name-input::selection {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .name-input::-moz-selection {
+      background: var(--accent-primary);
+      color: white;
     }
 
     .name-input:focus {
@@ -672,7 +715,7 @@ import { WizLight } from '../models/wiz-light.interface';
     }
   `]
 })
-export class LightCardComponent implements OnDestroy {
+export class LightCardComponent implements OnDestroy, OnInit, OnChanges, AfterViewInit {
   @Input() light!: WizLight;
   @Output() togglePower = new EventEmitter<string>();
   @Output() brightnessChange = new EventEmitter<{lightId: string, brightness: number}>();
@@ -681,12 +724,175 @@ export class LightCardComponent implements OnDestroy {
   @Output() randomize = new EventEmitter<string>();
   @Output() nameChange = new EventEmitter<{lightId: string, name: string}>();
 
-  private rgbDebounceTimer: any;
+  @ViewChild('nameInput') nameInputRef!: ElementRef<HTMLInputElement>;
+
+  // Queue-based command system properties
+  private commandQueue: Array<{
+    type: 'brightness' | 'colorTemp' | 'rgb',
+    lightId: string,
+    data: any,
+    timestamp: number
+  }> = [];
+  private readonly MAX_QUEUE_SIZE = 3; // Keep only latest 3 commands
+  private readonly QUEUE_PROCESS_INTERVAL_MS = 100; // Process every 100ms
+  private queueProcessor: any;
   private isDragging = false;
+
+  // Input-only slider tracking
+  private dragState = {
+    brightness: false,
+    colorTemp: false,
+    rgbR: false,
+    rgbG: false,
+    rgbB: false,
+    colorPicker: false
+  };
+  private readonly DRAG_RELEASE_DELAY_MS = 500; // Allow updates 500ms after drag ends
+
+  // Local slider values (input-only when dragging)
+  public localValues = {
+    brightness: 0,
+    colorTemp: 4000,
+    rgbR: 0,
+    rgbG: 0,
+    rgbB: 0
+  };
 
   // Name editing properties
   public isEditingName = false;
   public editingName = '';
+  private shouldSelectTextOnViewInit = false;
+
+  constructor() {
+    // Start queue processor
+    this.queueProcessor = setInterval(() => {
+      this.processCommandQueue();
+    }, this.QUEUE_PROCESS_INTERVAL_MS);
+  }
+
+  ngOnInit(): void {
+    this.updateLocalValues();
+  }
+
+  ngOnChanges(): void {
+    this.updateLocalValues();
+  }
+
+  ngAfterViewInit(): void {
+    if (this.shouldSelectTextOnViewInit) {
+      this.shouldSelectTextOnViewInit = false;
+      this.selectNameInputText();
+    }
+  }
+
+  private updateLocalValues(): void {
+    // Only update local values if not currently dragging the respective control
+    if (!this.dragState.brightness) {
+      this.localValues.brightness = this.light.isOn ? (this.light.brightness || 10) : 0;
+    }
+    if (!this.dragState.colorTemp) {
+      this.localValues.colorTemp = this.light.colorTemp || 4000;
+    }
+    if (!this.dragState.rgbR && !this.dragState.colorPicker) {
+      this.localValues.rgbR = this.light.rgb.r;
+    }
+    if (!this.dragState.rgbG && !this.dragState.colorPicker) {
+      this.localValues.rgbG = this.light.rgb.g;
+    }
+    if (!this.dragState.rgbB && !this.dragState.colorPicker) {
+      this.localValues.rgbB = this.light.rgb.b;
+    }
+  }
+
+  private addToQueue(type: 'brightness' | 'colorTemp' | 'rgb', data: any): void {
+    const command = {
+      type,
+      lightId: this.light.id,
+      data,
+      timestamp: Date.now()
+    };
+
+    // Remove any existing commands of the same type for this light
+    this.commandQueue = this.commandQueue.filter(cmd =>
+      !(cmd.type === type && cmd.lightId === this.light.id)
+    );
+
+    // Add new command
+    this.commandQueue.push(command);
+
+    // Keep queue size under control (FIFO - remove oldest if too many)
+    while (this.commandQueue.length > this.MAX_QUEUE_SIZE) {
+      this.commandQueue.shift();
+    }
+  }
+
+  private processCommandQueue(): void {
+    if (this.commandQueue.length === 0) return;
+
+    // Process the oldest command
+    const command = this.commandQueue.shift();
+    if (!command) return;
+
+    // Emit the appropriate event
+    switch (command.type) {
+      case 'brightness':
+        this.brightnessChange.emit({
+          lightId: command.lightId,
+          brightness: command.data.brightness
+        });
+        break;
+      case 'colorTemp':
+        this.colorTempChange.emit({
+          lightId: command.lightId,
+          colorTemp: command.data.colorTemp
+        });
+        break;
+      case 'rgb':
+        this.rgbChange.emit({
+          lightId: command.lightId,
+          r: command.data.r,
+          g: command.data.g,
+          b: command.data.b
+        });
+        break;
+    }
+  }
+
+  // Drag tracking methods
+  startDrag(control: 'brightness' | 'colorTemp' | 'rgbR' | 'rgbG' | 'rgbB' | 'colorPicker'): void {
+    this.dragState[control] = true;
+    this.isDragging = true;
+  }
+
+  endDrag(control: 'brightness' | 'colorTemp' | 'rgbR' | 'rgbG' | 'rgbB' | 'colorPicker'): void {
+    // Delay clearing drag state to prevent immediate updates from light feedback
+    setTimeout(() => {
+      this.dragState[control] = false;
+      // Check if any controls are still being dragged
+      this.isDragging = Object.values(this.dragState).some(dragging => dragging);
+    }, this.DRAG_RELEASE_DELAY_MS);
+  }
+
+  // Getter methods for input-only slider values
+  get currentBrightness(): number {
+    return this.light.isOn ? (this.light.brightness || 10) : 0;
+  }
+
+  get currentColorTemp(): number {
+    return this.light.colorTemp || 4000;
+  }
+
+  get currentRgbR(): number {
+    return this.light.rgb.r;
+  }
+
+  get currentRgbG(): number {
+    return this.light.rgb.g;
+  }
+
+  get currentRgbB(): number {
+    return this.light.rgb.b;
+  }
 
   onTogglePower(): void {
     this.togglePower.emit(this.light.id);
@@ -703,47 +909,47 @@ export class LightCardComponent implements OnDestroy {
       target.value = '0';
     }
 
-    this.brightnessChange.emit({
-      lightId: this.light.id,
-      brightness: brightness
-    });
+    // Update local value immediately for responsive UI
+    this.localValues.brightness = brightness;
+
+    // Add to queue instead of immediate emit
+    this.addToQueue('brightness', { brightness });
   }
 
   onColorTempChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     const colorTemp = parseInt(target.value);
-    this.colorTempChange.emit({
-      lightId: this.light.id,
-      colorTemp: colorTemp
-    });
+
+    // Update local value immediately for responsive UI
+    this.localValues.colorTemp = colorTemp;
+
+    // Add to queue instead of immediate emit
+    this.addToQueue('colorTemp', { colorTemp });
   }
 
   onRgbChange(component: 'r' | 'g' | 'b', event: Event): void {
     const target = event.target as HTMLInputElement;
     const value = parseInt(target.value);
 
-    // Create RGB object if it doesn't exist
-    const newRgb = this.light.rgb ? { ...this.light.rgb } : { r: 0, g: 0, b: 0 };
-    newRgb[component] = value;
+    // Update local values immediately for responsive UI
+    if (component === 'r') this.localValues.rgbR = value;
+    else if (component === 'g') this.localValues.rgbG = value;
+    else if (component === 'b') this.localValues.rgbB = value;
 
-    // Clear existing timer
-    if (this.rgbDebounceTimer) {
-      clearTimeout(this.rgbDebounceTimer);
-    }
+    // Create RGB object using local values
+    const newRgb = {
+      r: this.localValues.rgbR,
+      g: this.localValues.rgbG,
+      b: this.localValues.rgbB
+    };
 
-    // Set dragging state
+    // Mark the specific RGB component as being dragged
+    const dragKey = component === 'r' ? 'rgbR' : component === 'g' ? 'rgbG' : 'rgbB';
+    this.dragState[dragKey] = true;
     this.isDragging = true;
 
-    // Debounce the actual light update during manual dragging
-    this.rgbDebounceTimer = setTimeout(() => {
-      this.rgbChange.emit({
-        lightId: this.light.id,
-        r: newRgb.r,
-        g: newRgb.g,
-        b: newRgb.b
-      });
-      this.isDragging = false;
-    }, 100); // Small delay to batch rapid changes
+    // Add to queue instead of using debounce timer
+    this.addToQueue('rgb', newRgb);
   }
 
   rgbToHex(r: number, g: number, b: number): string {
@@ -768,24 +974,24 @@ export class LightCardComponent implements OnDestroy {
     const hexColor = target.value;
     const rgb = this.hexToRgb(hexColor);
 
-    // Clear any pending debounced updates since this is immediate
-    if (this.rgbDebounceTimer) {
-      clearTimeout(this.rgbDebounceTimer);
-    }
+    // Update local values immediately for responsive UI
+    this.localValues.rgbR = rgb.r;
+    this.localValues.rgbG = rgb.g;
+    this.localValues.rgbB = rgb.b;
 
-    this.rgbChange.emit({
-      lightId: this.light.id,
-      r: rgb.r,
-      g: rgb.g,
-      b: rgb.b
-    });
+    // Mark color picker as being used to prevent feedback from RGB updates
+    this.dragState.colorPicker = true;
+    this.isDragging = true;
+
+    // Use queue system like other controls
+    this.addToQueue('rgb', rgb);
   }
 
   onRandomize(): void {
-    // Clear any pending debounced updates since this is immediate
-    if (this.rgbDebounceTimer) {
-      clearTimeout(this.rgbDebounceTimer);
-    }
+    // Clear any pending RGB commands since randomize is immediate
+    this.commandQueue = this.commandQueue.filter(cmd =>
+      !(cmd.type === 'rgb' && cmd.lightId === this.light.id)
+    );
 
     this.randomize.emit(this.light.id);
   }
@@ -796,15 +1002,60 @@ export class LightCardComponent implements OnDestroy {
 
     this.isEditingName = true;
     this.editingName = this.light.name || '';
+    this.shouldSelectTextOnViewInit = true;
 
-    // Focus the input after the view updates
+    // Use multiple timing approaches to ensure text selection works
+    this.selectNameInputText();
+  }
+
+  private selectNameInputText(): void {
+    // Try immediately after view update
     setTimeout(() => {
-      const input = document.querySelector('.name-input') as HTMLInputElement;
-      if (input) {
-        input.focus();
+      this.trySelectText();
+    }, 0);
+
+    // Backup attempt with longer delay
+    setTimeout(() => {
+      this.trySelectText();
+    }, 50);
+
+    // Final attempt with even longer delay
+    setTimeout(() => {
+      this.trySelectText();
+    }, 150);
+  }
+
+  private trySelectText(): void {
+    const input = this.nameInputRef?.nativeElement;
+    if (input && this.isEditingName) {
+      // Ensure input is visible and focused
+      input.focus();
+
+      // Multiple selection approaches for maximum compatibility
+      input.select();
+      input.setSelectionRange(0, input.value.length);
+
+      // Force selection if the input is focused but not selected
+      if (document.activeElement === input && input.selectionStart === input.selectionEnd) {
         input.select();
       }
-    }, 0);
+    }
+  }
+
+  onInputFocus(event: FocusEvent): void {
+    const input = event.target as HTMLInputElement;
+    // Small delay to ensure the input is fully ready for selection
+    setTimeout(() => {
+      input.select();
+      input.setSelectionRange(0, input.value.length);
+    }, 10);
+  }
+
+  onInputClick(event: MouseEvent): void {
+    const input = event.target as HTMLInputElement;
+    // Select all text when clicking in the input field
+    input.select();
+    input.setSelectionRange(0, input.value.length);
   }
 
   finishEditingName(): void {
@@ -823,9 +1074,12 @@ export class LightCardComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Clean up any pending timers
-    if (this.rgbDebounceTimer) {
-      clearTimeout(this.rgbDebounceTimer);
+    // Clean up queue processor
+    if (this.queueProcessor) {
+      clearInterval(this.queueProcessor);
     }
+
+    // Clear any remaining commands
+    this.commandQueue = [];
   }
 }
