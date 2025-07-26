@@ -1,5 +1,27 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" fill="#1a1a1a" rx="64"/>
-  <text x="256" y="320" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji" font-size="280" text-anchor="middle" fill="#FFD700">🔆</text>
+  <defs>
+    <radialGradient id="sunGradient" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle for better visibility -->
+  <circle cx="256" cy="256" r="245.76" fill="#1a1a1a" opacity="0.1"/>
+  
+  <!-- Sun rays -->
+  <line x1="409.6" y1="256" x2="486.4" y2="256" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="389.0215020212898" y1="332.79999999999995" x2="455.53225303193466" y2="371.2" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="332.8" y1="389.02150202128973" x2="371.20000000000005" y2="455.5322530319346" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="256" y1="409.6" x2="256" y2="486.4" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="179.20000000000005" y1="389.0215020212898" x2="140.80000000000007" y2="455.53225303193466" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="122.97849797871021" y1="332.79999999999995" x2="56.46774696806534" y2="371.2" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="102.4" y1="256" x2="25.600000000000023" y2="256" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="122.97849797871024" y1="179.2" x2="56.46774696806537" y2="140.79999999999998" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="179.19999999999993" y1="122.97849797871027" x2="140.7999999999999" y2="56.4677469680654" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="255.99999999999997" y1="102.4" x2="255.99999999999997" y2="25.600000000000023" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="332.8" y1="122.97849797871024" x2="371.20000000000005" y2="56.46774696806537" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/><line x1="389.02150202128973" y1="179.19999999999993" x2="455.5322530319346" y2="140.7999999999999" stroke="#FFA500" stroke-width="10.24" stroke-linecap="round"/>
+  
+  <!-- Main sun circle -->
+  <circle cx="256" cy="256" r="128" fill="url(#sunGradient)" filter="url(#glow)"/>
+  
+  <!-- Inner highlight -->
+  <circle cx="217.6" cy="217.6" r="38.4" fill="#FFFF99" opacity="0.6"/>
 </svg>

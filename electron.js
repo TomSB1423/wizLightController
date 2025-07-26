@@ -175,7 +175,12 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    icon: path.join(__dirname, 'icons/icon.ico')
+    // Use platform-specific icon
+    icon: process.platform === 'darwin' 
+      ? path.join(__dirname, 'icons/icon.icns')
+      : process.platform === 'win32'
+      ? path.join(__dirname, 'icons/icon.ico') 
+      : path.join(__dirname, 'icons/icon.png')
   });
 
   // Load the Angular app from the development server

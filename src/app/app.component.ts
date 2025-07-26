@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { WizLight } from './models/wiz-light.interface';
 import { WizLightElectronService } from './services/wiz-light-electron.service';
+import { WizLightMockService } from './services/wiz-light-mock.service';
 import { LightControlService } from './services/light-control.interface';
 import { LightCardComponent } from './components/light-card.component';
 
@@ -14,8 +15,8 @@ export function lightServiceFactory(): LightControlService {
   if (isElectron) {
     return new WizLightElectronService();
   } else {
-    // For now, return a mock service or throw an error
-    throw new Error('HTTP-based service not yet adapted to the common interface');
+    // Return mock service for browser/demo mode
+    return new WizLightMockService();
   }
 }
 
