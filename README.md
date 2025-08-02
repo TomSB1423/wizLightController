@@ -14,9 +14,9 @@ Built with:
 
 ^ not ai generated :)
 
-## 📸 Screenshots
+## 📸 Demo
 
-![WiZ Light Controller App](demos/app.png)
+![WiZ Light Controller App](demos/demo.mp4)
 
 ## ✨ Features
 
