@@ -16,7 +16,7 @@ Built with:
 
 ## 📸 Demo
 
-<img src="demos/demo.gif" alt="WiZ Light Controller App" style="max-height: 700px;">
+<img src="demos/demo.gif" alt="WiZ Light Controller App" style="max-height: 400px;">
 
 ## ✨ Features
 
