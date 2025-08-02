@@ -16,7 +16,7 @@ Built with:
 
 ## 📸 Demo
 
-![WiZ Light Controller App](demos/demo.mp4)
+![WiZ Light Controller App](demos/demo.gif)
 
 ## ✨ Features
 
